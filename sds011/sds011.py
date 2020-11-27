@@ -127,7 +127,7 @@ class SDS011():
         self.rx_queue_handler = threading.Thread(target = self.handle_rx)
         self.rx_queue_handler.setDaemon(True)
         self.rx_queue_handler.start()
-        self.probe()
+        self.wakeup()
         if use_socket is True:
             self.serversocket = sockethandler(port=socket_portnum)
         if use_database is True:
@@ -148,6 +148,7 @@ class SDS011():
         return
 
     def get_sensor_data(self):
+        self.probe()
         with self.mutex:
             data = {"devid":self.devid,
                     "firmware_date":self.firmware,
@@ -318,7 +319,10 @@ class SDS011():
         return msg
 
     def __del__(self):
-        if self.serversocket is not None:
-            self.serversocket.__del__()
+        try:
+            if self.serversocket is not None:
+                self.serversocket.__del__()
+        except:
+            pass
             
         
